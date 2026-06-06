@@ -1,0 +1,174 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+@font-face {
+    font-family: "vppixel-standard";
+    src: url('../font/vppixel-standard.otf');
+}
+
+@font-face {
+    font-family: "Pretendard";
+    src: url('../font/PretendardVariable.ttf') format('truetype');
+    font-weight: 100 900;
+}
+
+body {
+    background: #ffffff;
+    width: 100vw;
+    overflow-x: hidden;
+    overflow-y: auto;
+    font-family: "Pretendard", sans-serif;
+}
+
+/* ── 상단 네비게이션 ── */
+.site-nav {
+    position: fixed;
+    top: 20px;
+    left: 50px;
+    z-index: 9999;
+    display: flex;
+    gap: 20px;
+    font-family: "vppixel-standard", sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    line-height: 1;
+}
+.site-nav a {
+    color: #000;
+    text-decoration: none;
+}
+.site-nav a:hover {
+    text-decoration: underline;
+}
+
+/* ── 콘텐츠 영역 ── */
+.content-overlay {
+    padding: 50px 40px 80px;
+    position: relative;
+}
+
+/* 좌우 패딩 경계에 뷰포트 전체 높이를 가르는 세로선 */
+.content-overlay::before,
+.content-overlay::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: #777777;
+    pointer-events: none;
+}
+.content-overlay::before { left: 40px; }
+.content-overlay::after  { right: 40px; }
+
+/* Category 좌측 구분선 (JS에서 left 값 주입) */
+#category-line {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: #777777;
+    pointer-events: none;
+    z-index: 10;
+}
+
+.activity-list {
+    width: 100%;
+}
+
+/* ── 활동 행 ── */
+.activity-row {
+    width: calc(100% + 80px);
+    margin-left: -40px;
+    margin-right: -40px;
+    display: flex;
+    flex-direction: column;
+    border-bottom: 1px solid #777777;
+}
+.activity-row:first-child {
+    border-top: 1px solid #777777;
+}
+
+/* ── 행 상단: 항상 보이는 title/category/date ── */
+.row-header {
+    display: flex;
+    align-items: flex-start;
+    padding: clamp(16px, 2vw, 20px) 40px;
+    cursor: pointer;
+}
+.activity-row:hover .col-title,
+.activity-row:hover .col-category,
+.activity-row:hover .col-date {
+    opacity: 0.4;
+}
+
+/* ── 행 확장 영역: 클릭 시 표시 ── */
+.row-expanded {
+    display: none;
+    padding: 0 40px 0;
+}
+.activity-row.expanded .row-expanded {
+    display: flex;
+}
+
+/* 이미지 영역: title 너비만큼 spacer 후 이미지 2개 */
+.col-spacer {
+    width: 40%;
+    flex-shrink: 0;
+}
+.col-images {
+    width: 60%;
+    display: flex;
+    /* gap: clamp(6px, 0.5vw, 12px); */
+}
+.col-images img {
+    width: 50%;
+    height: auto;
+    display: block;
+    object-fit: cover;
+}
+.col-images.single img {
+    width: 100%;
+}
+
+/* ── 모바일 ── */
+@media (max-width: 768px) {
+    /* category 구분선 숨김 */
+    #category-line {
+        display: none;
+    }
+
+    /* 이미지 영역: spacer 제거, 전체 너비로 표시 */
+    .col-spacer {
+        display: none;
+    }
+    .col-images {
+        width: 100%;
+    }
+}
+
+/* ── 컬럼 ── */
+.col-title {
+    width: 40%;
+    flex-shrink: 0;
+    font-size: clamp(11px, 1.5vw, 18px);
+    padding-left: 10px;
+    padding-right: 8px;
+    transition: opacity 0.1s ease;
+}
+.col-category {
+    width: 17%;
+    flex-shrink: 0;
+    font-size: clamp(10px, 1.5vw, 18px);
+    padding-left: 10px;
+    transition: opacity 0.1s ease;
+}
+.col-date {
+    width: 43%;
+    font-size: clamp(11px, 1.5vw, 18px);
+    padding-right: 10px;
+    transition: opacity 0.1s ease;
+}

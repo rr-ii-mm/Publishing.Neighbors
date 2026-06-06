@@ -1,0 +1,85 @@
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        @font-face {
+            font-family: "vppixel-standard";
+            src: url('vppixel-standard.otf');
+        }
+
+
+        body {
+    overflow: hidden;
+    font-family: "vppixel-standard";
+    display: flex;
+    width: 100vw;
+    height: 100vh;
+}
+
+.half {
+    position: relative;
+    width: 50%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #ffffff;
+    transition: background-color 0.15s ease;
+    cursor: pointer;
+}
+
+/* 두 패널 사이 구분선
+.left {
+    border-right: 1px solid #000;
+} */
+
+.content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+h2 {
+    font-size: clamp(2.5rem, 7vw, 6.5rem);
+}
+
+h2 a {
+    text-decoration: none;
+    color: #000000;
+    transition: color 0.15s ease;
+}
+
+/* 호버 시 링크 색상 — JS로 배경이 어두워질 때를 위해 white로 전환 */
+.half.hovered h2 a {
+    color: #ffffff;
+}
+
+/* About 링크 */
+.about-link {
+    position: fixed;
+    top: 20px;
+    left: 50px;
+    z-index: 9999;
+    font-family: "vppixel-standard", sans-serif;
+    font-size: 14px;
+    color: #000;
+    text-decoration: none;
+    letter-spacing: 0.05em;
+    line-height: 1;
+}
+.about-link:hover {
+    text-decoration: underline;
+}
+
+/* 모바일: 좌우 → 상하 분할 */
+@media (max-width: 768px) {
+    body {
+        flex-direction: column;
+    }
+    .half {
+        width: 100%;
+        height: 50%;
+    }
+}

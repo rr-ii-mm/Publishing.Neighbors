@@ -1,0 +1,99 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+@font-face {
+    font-family: "vppixel-standard";
+    src: url('../font/vppixel-standard.otf');
+}
+
+@font-face {
+    font-family: "Pretendard";
+    src: url('../font/PretendardVariable.ttf') format('truetype');
+    font-weight: 100 900;
+}
+
+body {
+    background: #ffffff;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    font-family: "vppixel-standard", sans-serif;
+}
+
+/* ── 상단 네비게이션 ── */
+.site-nav {
+    position: fixed;
+    top: 20px;
+    left: 50px;
+    z-index: 9999;
+    display: flex;
+    gap: 20px;
+    font-family: "vppixel-standard", sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    line-height: 1;
+}
+.site-nav a {
+    color: #000;
+    text-decoration: none;
+}
+.site-nav a:hover {
+    text-decoration: underline;
+}
+
+/* ── 그리드 ── */
+#grid {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    display: grid;
+    /* 컬럼은 1fr로 뷰포트 너비를 정확히 균등 분할 → 잘림 없음 */
+    grid-template-columns: repeat(var(--cols), 1fr);
+    /* 행 높이는 JS에서 계산한 셀 크기(컬럼 너비와 동일)로 고정 → 정방형 */
+    grid-template-rows: repeat(var(--rows), var(--cell-px));
+    border-left: 1px solid #777777;
+    border-top: 1px solid #777777;
+}
+
+.cell {
+    /* 너비는 1fr로 결정되므로 height만 맞추면 정방형 유지 */
+    height: var(--cell-px);
+    border-right: 1px solid #777777;
+    border-bottom: 1px solid #777777;
+    background: #ffffff;
+    cursor: default;
+}
+
+.cell.book-cell {
+    cursor: pointer;
+}
+
+/* ── 텍스트 툴팁 ── */
+.thumbnail-tooltip {
+    position: fixed;
+    display: none;
+    z-index: 9998;
+    pointer-events: none;
+    width: max-content;
+}
+
+.thumbnail-tooltip .book-title {
+    font-family: "Pretendard", sans-serif;
+    font-size: 12px, 1rem, 1.2vw;
+    font-weight: 500;
+    line-height: 1.5;
+    color: #000000;
+    white-space: nowrap;
+}
+
+.thumbnail-tooltip .book-author {
+    font-family: "Pretendard", sans-serif;
+    font-size: 12px, 1rem, 1.2vw;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #ffffff;
+}
