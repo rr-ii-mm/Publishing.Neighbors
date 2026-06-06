@@ -179,34 +179,59 @@ function buildGrid() {
                     el.classList.add('book-cell');
                     el.style.backgroundColor = b.color;
 
-                    el.addEventListener('mouseenter', function() {
-                        resolveThumb(b, function(src) {
-                            el.style.backgroundImage    = 'url(' + src + ')';
-                            el.style.backgroundSize     = 'cover';
-                            el.style.backgroundPosition = 'center';
-                        });
+                    function showTooltip(b) {
                         var tc = contrastColor(b.color);
                         labelTitle.style.color  = tc;
                         labelAuthor.style.color = tc;
                         labelTitle.textContent  = b.title  || '';
                         labelAuthor.textContent = b.author || '';
                         tooltip.style.display = 'block';
+                    }
+
+                    function positionTooltip(cx, cy) {
+                        var tw = tooltip.offsetWidth;
+                        var th = tooltip.offsetHeight;
+                        var tx = cx + 18;
+                        var ty = cy + 18;
+                        if (tx + tw > window.innerWidth)  tx = cx - tw - 18;
+                        if (ty + th > window.innerHeight) ty = cy - th - 18;
+                        if (tx < 8) tx = 8;
+                        if (ty < 8) ty = 8;
+                        tooltip.style.left = tx + 'px';
+                        tooltip.style.top  = ty + 'px';
+                    }
+
+                    el.addEventListener('mouseenter', function() {
+                        resolveThumb(b, function(src) {
+                            el.style.backgroundImage    = 'url(' + src + ')';
+                            el.style.backgroundSize     = 'cover';
+                            el.style.backgroundPosition = 'center';
+                        });
+                        showTooltip(b);
                     });
 
                     el.addEventListener('mousemove', function(e) {
-                        var tx = e.clientX + 18;
-                        var ty = e.clientY + 18;
-                        var th = tooltip.offsetHeight;
-                        if (tx + 200 > window.innerWidth)  tx = e.clientX - 218;
-                        if (ty + th  > window.innerHeight) ty = e.clientY - th - 18;
-                        tooltip.style.left = tx + 'px';
-                        tooltip.style.top  = ty + 'px';
+                        positionTooltip(e.clientX, e.clientY);
                     });
 
                     el.addEventListener('mouseleave', function() {
                         el.style.backgroundImage = '';
                         tooltip.style.display = 'none';
                     });
+
+                    el.addEventListener('touchstart', function(e) {
+                        var touch = e.touches[0];
+                        showTooltip(b);
+                        requestAnimationFrame(function() {
+                            positionTooltip(touch.clientX, touch.clientY);
+                        });
+                    }, { passive: true });
+
+                    el.addEventListener('touchend', function() {
+                        setTimeout(function() {
+                            tooltip.style.display = 'none';
+                        }, 800);
+                    }, { passive: true });
 
                     // el.addEventListener('click', function() {
                     //     window.location.href = b.url;

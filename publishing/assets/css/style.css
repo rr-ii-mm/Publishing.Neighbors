@@ -90,6 +90,18 @@ body {
     white-space: nowrap;
 }
 
+@media (max-width: 768px) {
+    .thumbnail-tooltip {
+        max-width: calc(100vw - 36px);
+        width: auto;
+    }
+    .thumbnail-tooltip .book-title,
+    .thumbnail-tooltip .book-author {
+        white-space: normal;
+        word-break: keep-all;
+    }
+}
+
 .thumbnail-tooltip .book-author {
     font-family: "Pretendard", sans-serif;
     font-size: 12px, 1rem, 1.2vw;
