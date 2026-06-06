@@ -154,6 +154,11 @@ strong {
 
 /* ── 모바일 ── */
 @media (max-width: 768px) {
+    body {
+        height: auto;
+        overflow-y: auto;
+    }
+
     #center-line {
         display: none;
     }
