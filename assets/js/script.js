@@ -21,6 +21,19 @@ document.querySelectorAll('.half').forEach(function(panel) {
         panel.classList.remove('hovered');
     });
 
+    panel.addEventListener('touchstart', function() {
+        var color = getRandomColor();
+        panel.style.backgroundColor = color;
+        panel.classList.add('hovered');
+    }, { passive: true });
+
+    panel.addEventListener('touchend', function() {
+        setTimeout(function() {
+            panel.style.backgroundColor = '#ffffff';
+            panel.classList.remove('hovered');
+        }, 400);
+    }, { passive: true });
+
     // 패널 전체를 클릭해도 링크로 이동
     panel.addEventListener('click', function(e) {
         var link = panel.querySelector('a');
