@@ -11,7 +11,7 @@ const activities = [
         url:      '#',
         images:   [
             'assets/img/UE17_2026_2.JPG',
-            'assets/img/UE17_2026_3.JPG'
+            'assets/img/UE17_2026_3.jpg'
         ]
     },
     {
