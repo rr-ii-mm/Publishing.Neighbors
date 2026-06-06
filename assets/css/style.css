@@ -43,6 +43,7 @@
 
 h2 {
     font-size: clamp(2.5rem, 7vw, 6.5rem);
+    font-weight: normal;
 }
 
 h2 a {
