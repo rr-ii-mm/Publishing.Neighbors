@@ -114,24 +114,91 @@ body {
     display: flex;
 }
 
-/* 이미지 영역: title 너비만큼 spacer 후 이미지 2개 */
+/* 이미지 영역: title 너비만큼 spacer 후 이미지 슬라이더 */
 .col-spacer {
     width: 40%;
     flex-shrink: 0;
 }
 .col-images {
     width: 60%;
+    min-width: 0;
+    /* 프레임 가로÷세로 비율. 1.5(3:2) = 3:4 세로 사진 2장이 꽉 차는 높이 */
+    --frame-ratio: 1.5;
+    /* 프레임 대비 이미지가 차지하는 폭. 1 미만이면 다음 이미지 가장자리가 살짝 보임 */
+    --fill: 1;
+    /* 이미지 최대 높이 (화면 높이 기준) */
+    --h-cap: 85vh;
+    /* 이미지 사이 간격 (원하면 예: 8px) */
+    --slide-gap: 0px;
+    /* 아래 .slider-track 높이 계산(cqw)의 기준 */
+    container-type: inline-size;
+}
+
+/* ── 이미지 슬라이더 ──
+   높이는 고정, 이미지는 원본 비율 그대로 → 잘리지 않음.
+   프레임을 넘치는 이미지는 드래그·트랙패드·터치 스와이프, 키보드 ←→ 로 한 장씩 이동.
+   --max-ratio: 가장 가로로 긴 이미지 비율(JS 주입) → 그 이미지도 프레임 안에 전부 들어오도록 높이를 낮춤 */
+.slider-track {
+    position: relative;
     display: flex;
-    /* gap: clamp(6px, 0.5vw, 12px); */
+    gap: var(--slide-gap);
+    height: min(
+        calc(100cqw * var(--fill) / var(--frame-ratio)),
+        calc(100cqw * var(--fill) / var(--max-ratio, var(--frame-ratio))),
+        var(--h-cap)
+    );
+    /* 마우스·트랙패드 환경: 브라우저 기본 가로 스크롤을 끄고 JS가 한 장씩 이동
+       (기본 스크롤을 켜두면 이미지 위에서 세로 스크롤 시 페이지가 안 내려가는 문제) */
+    overflow: hidden;
+    touch-action: pan-y;             /* 터치스크린 노트북: 가로 드래그는 슬라이드, 세로는 페이지 스크롤 */
+    scrollbar-width: none;
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
 }
-.col-images img {
-    width: 50%;
-    height: auto;
+.slider-track:focus,
+.slider-track:focus-visible {
+    outline: none;                   /* 클릭·키보드 사용 시 검은 윤곽선 표시 안 함 */
+}
+/* 넘길 이미지가 있는 행: 마우스 커서로 드래그 가능함을 표시 */
+.slider-track.is-slidable {
+    cursor: grab;
+}
+.slider-track.is-dragging {
+    cursor: grabbing;
+}
+/* 터치 기기(휴대폰·태블릿): 기본 터치 스와이프 + 한 장씩 멈춤 */
+@media (pointer: coarse) {
+    .slider-track {
+        overflow-x: auto;
+        overflow-y: hidden;
+        overscroll-behavior-x: contain;
+        touch-action: auto;
+        scroll-snap-type: x mandatory;
+    }
+}
+.slider-track::-webkit-scrollbar {
+    display: none;
+}
+.slider-track img {
+    flex: 0 0 auto;
+    height: 100%;
+    width: auto;
+    max-width: 100%;
     display: block;
-    object-fit: cover;
+    object-fit: contain;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;        /* 터치 스와이프 시 한 장씩만 넘어가도록 */
+    -webkit-user-drag: none;
+    user-select: none;
+    pointer-events: none;            /* 이미지 자체의 드래그·선택 방지 (이벤트는 트랙이 받음) */
 }
-.col-images.single img {
-    width: 100%;
+/* 이미지가 프레임보다 좁아 남는 공간이 생기면 가운데 정렬.
+   이미지가 프레임을 넘칠 때(슬라이드 행)는 auto 여백이 0이 되어 자동으로 왼쪽 기준 유지 */
+.slider-track img:first-child {
+    margin-left: auto;
+}
+.slider-track img:last-child {
+    margin-right: auto;
 }
 
 /* ── 모바일 ── */
@@ -147,6 +214,19 @@ body {
     }
     .col-images {
         width: 100%;
+        /* 모바일: 세로 사진 1장씩 */
+        --frame-ratio: 0.75;
+        --fill: 1;                   /* 0.88로 바꾸면 다음 사진 가장자리가 살짝 보임 */
+        /* 이미지 높이는 화면 높이의 50%까지 */
+        --h-cap: 50vh;
+    }
+}
+/* 모바일 브라우저 주소창·툴바를 뺀 실제 보이는 높이 기준(svh) 지원 시 */
+@supports (height: 1svh) {
+    @media (max-width: 768px) {
+        .col-images {
+            --h-cap: 50svh;
+        }
     }
 }
 
