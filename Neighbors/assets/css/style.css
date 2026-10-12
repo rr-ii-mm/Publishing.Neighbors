@@ -192,12 +192,15 @@ body {
     user-select: none;
     pointer-events: none;            /* 이미지 자체의 드래그·선택 방지 (이벤트는 트랙이 받음) */
 }
-/* 이미지가 프레임보다 좁아 남는 공간이 생기면 가운데 정렬.
-   이미지가 프레임을 넘칠 때(슬라이드 행)는 auto 여백이 0이 되어 자동으로 왼쪽 기준 유지 */
-.slider-track img:first-child {
+/* 순환용 복제 이미지: 이미지가 프레임을 넘쳐 순환하는 행(.is-loop)에서만 보임 */
+.slider-track:not(.is-loop) img.is-clone {
+    display: none;
+}
+/* 이미지가 프레임보다 좁아 남는 공간이 생기면 가운데 정렬 (순환하지 않는 행에만 적용) */
+.slider-track:not(.is-loop) img.slide-first {
     margin-left: auto;
 }
-.slider-track img:last-child {
+.slider-track:not(.is-loop) img.slide-last {
     margin-right: auto;
 }
 

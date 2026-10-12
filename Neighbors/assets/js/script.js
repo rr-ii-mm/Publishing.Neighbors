@@ -68,10 +68,13 @@ const activities = [
 /* =====================================================
    이미지 슬라이더
    - 이미지는 원본 비율 그대로(잘림 없음), 프레임 높이는 고정
+   - 순환: 마지막 이미지 다음엔 첫 이미지, 첫 이미지 이전엔 마지막 이미지가 이어서 나옴
+     (원본 앞뒤에 복제본을 두고, 끝을 넘어가면 같은 이미지 위치로 보이지 않게 되돌림)
    - 마우스·트랙패드 클릭 후 드래그: 한 번 끌 때 한 장
    - 트랙패드·매직마우스 두 손가락 좌우 스와이프: 한 번 쓸어넘길 때 한 장
    - 모바일 터치 스와이프: 한 장씩 (CSS scroll-snap-stop)
    - 키보드 ← →: 마우스를 올린 행 > 마지막으로 펼친 행 > 화면에 가장 많이 보이는 행 순으로 대상 선택
+   - 이미지가 프레임 안에 모두 들어오는 행은 넘기지 않음(순환도 꺼짐)
    ===================================================== */
 
 var REDUCED_MOTION = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -89,30 +92,49 @@ function buildSlider(images, title) {
     track.setAttribute('aria-label', title + ' 이미지');
     wrap.appendChild(track);
 
-    images.forEach(function(src) {
+    function makeImg(src, isClone) {
         var img = document.createElement('img');
         img.dataset.src = src;      // 행을 처음 펼칠 때 로드
         img.alt = '';
         img.decoding = 'async';
         img.draggable = false;
+        if (isClone) {
+            img.className = 'is-clone';
+            img.setAttribute('aria-hidden', 'true');
+        }
         img.addEventListener('load', onImageLoad);
-        track.appendChild(img);
-    });
+        return img;
+    }
 
-    var index = 0;                  // 현재 멈춤 지점 번호
+    /* [복제본 세트] [원본 세트] [복제본 세트] — 복제본은 순환할 때만 보임 */
+    var canLoop = images.length > 1;
+    if (canLoop) images.forEach(function(src) { track.appendChild(makeImg(src, true)); });
+    var originals = images.map(function(src) { return makeImg(src, false); });
+    originals.forEach(function(img) { track.appendChild(img); });
+    if (canLoop) images.forEach(function(src) { track.appendChild(makeImg(src, true)); });
+    originals[0].classList.add('slide-first');
+    originals[originals.length - 1].classList.add('slide-last');
+
+    var n = originals.length;
+    var looping = false;            // 순환 모드 여부 (이미지가 프레임을 넘칠 때만)
+    var index = 0;                  // 현재 멈춤 지점 번호 (순환 모드에선 원본 세트 n ~ 2n-1)
     var anim = null;                // 진행 중인 이동 애니메이션
     var drag = null;                // 진행 중인 드래그
     var api = { el: wrap, go: go, load: load, visibleArea: visibleArea };
     sliders.push(api);
 
-    function imgs()        { return track.querySelectorAll('img'); }
+    function allImgs()     { return track.querySelectorAll('img'); }
+    function slides()      { return looping ? allImgs() : originals; }
     function maxScroll()   { return track.scrollWidth - track.clientWidth; }
     function hasOverflow() { return maxScroll() > 1; }
     /* 터치 기기: 브라우저 기본 스와이프 사용 (CSS @media (pointer: coarse)) */
     function nativeMode()  { return getComputedStyle(track).overflowX !== 'hidden'; }
+    function gap()         { return parseFloat(getComputedStyle(track).columnGap) || 0; }
+    /* 원본 한 세트의 폭 (복제본 세트 간 이동 거리) */
+    function setWidth()    { return allImgs()[n].offsetLeft - allImgs()[0].offsetLeft; }
 
     function load() {
-        imgs().forEach(function(img) {
+        allImgs().forEach(function(img) {
             if (img.dataset.src) {
                 img.src = img.dataset.src;
                 img.removeAttribute('data-src');
@@ -123,26 +145,33 @@ function buildSlider(images, title) {
     /* 가장 가로로 긴 이미지 비율 → CSS가 그 이미지도 프레임에 다 들어오도록 높이 조정 */
     function onImageLoad() {
         var maxRatio = 0;
-        imgs().forEach(function(img) {
+        originals.forEach(function(img) {
             if (img.naturalHeight) {
                 maxRatio = Math.max(maxRatio, img.naturalWidth / img.naturalHeight);
             }
         });
         if (maxRatio) wrap.style.setProperty('--max-ratio', maxRatio);
-        requestAnimationFrame(refresh);
+        realign();
     }
 
-    /* 넘길 이미지가 있으면 드래그 커서 표시 */
-    function refresh() {
-        track.classList.toggle('is-slidable', hasOverflow() && !nativeMode());
+    /* 원본 이미지들이 프레임을 넘칠 때만 순환 모드 */
+    function updateMode() {
+        var total = 0;
+        originals.forEach(function(img) { total += img.offsetWidth; });
+        total += gap() * (n - 1);
+        var on = canLoop && track.clientWidth > 0 && total > track.clientWidth + 1;
+        if (on === looping) return;
+        looping = on;
+        track.classList.toggle('is-loop', on);
+        index = on ? n : 0;         // 모드가 바뀌면 첫 이미지부터
     }
 
-    /* 멈춤 지점: 각 이미지의 시작 위치 (마지막 쪽은 최대 스크롤값으로 맞추고 중복 제거) */
+    /* 멈춤 지점: 각 이미지의 시작 위치 */
     function stops() {
         var max = maxScroll();
         var list = [];
-        imgs().forEach(function(img) {
-            var x = Math.max(0, Math.min(img.offsetLeft, max));
+        Array.prototype.forEach.call(slides(), function(img) {
+            var x = looping ? img.offsetLeft : Math.max(0, Math.min(img.offsetLeft, max));
             if (!list.length || x - list[list.length - 1] > 1) list.push(x);
         });
         return list.length ? list : [0];
@@ -156,6 +185,16 @@ function buildSlider(images, title) {
         return best;
     }
 
+    /* 복제본 세트에 들어와 있으면 같은 이미지의 원본 위치로 순간 이동 (화면상 변화 없음) */
+    function normalize() {
+        if (!looping) return;
+        var shift = index < n ? 1 : (index >= 2 * n ? -1 : 0);
+        if (!shift) return;
+        stopAnim();
+        index += shift * n;
+        track.scrollLeft += shift * setWidth();
+    }
+
     /* 부드러운 이동: 직접 애니메이션 (브라우저마다 다른 smooth 스크롤에 의존하지 않음) */
     function stopAnim() {
         if (anim) { cancelAnimationFrame(anim); anim = null; }
@@ -165,18 +204,23 @@ function buildSlider(images, title) {
         stopAnim();
         if (nativeMode()) {
             track.scrollTo({ left: x, behavior: REDUCED_MOTION ? 'auto' : 'smooth' });
-            return;
+            return;                 // 끝나면 scroll 정착 처리에서 normalize
         }
         var from = track.scrollLeft;
         var dist = x - from;
-        if (REDUCED_MOTION || Math.abs(dist) < 1) { track.scrollLeft = x; return; }
+        if (REDUCED_MOTION || Math.abs(dist) < 1) { track.scrollLeft = x; normalize(); return; }
         var t0 = null;
         function step(now) {
             if (t0 === null) t0 = now;
             var p = Math.min(1, (now - t0) / SLIDE_DURATION);
             var eased = 1 - Math.pow(1 - p, 3);          // ease-out
             track.scrollLeft = from + dist * eased;
-            anim = p < 1 ? requestAnimationFrame(step) : null;
+            if (p < 1) {
+                anim = requestAnimationFrame(step);
+            } else {
+                anim = null;
+                normalize();
+            }
         }
         anim = requestAnimationFrame(step);
     }
@@ -184,6 +228,7 @@ function buildSlider(images, title) {
     /* 한 장 이동 (dir: 1 다음, -1 이전) */
     function go(dir) {
         if (!hasOverflow()) return;
+        normalize();                // 빠르게 연속으로 넘길 때 복제본 끝에 닿지 않도록
         var list = stops();
         var next = Math.max(0, Math.min(list.length - 1, index + dir));
         if (next === index) return;
@@ -220,6 +265,8 @@ function buildSlider(images, title) {
         if (e.pointerType === 'mouse' && e.button !== 0) return;
         if (e.pointerType === 'mouse') e.preventDefault();   // 텍스트 선택·포커스 방지
         stopAnim();
+        if (looping) index = nearestIndex(stops(), track.scrollLeft);
+        normalize();
         activeSlider = api;
         drag = {
             id: e.pointerId, x: e.clientX, y: e.clientY,
@@ -314,13 +361,15 @@ function buildSlider(images, title) {
         }
     }, { passive: false });
 
-    /* 터치로 직접 스와이프한 경우: 멈춘 위치로 현재 번호 동기화 */
+    /* 터치로 직접 스와이프한 경우: 멈춘 위치로 현재 번호 동기화 + 순환 위치 보정 */
     var settleTimer = null;
     track.addEventListener('scroll', function() {
         if (drag || anim) return;
         clearTimeout(settleTimer);
         settleTimer = setTimeout(function() {
-            if (!drag && !anim) index = nearestIndex(stops(), track.scrollLeft);
+            if (drag || anim) return;
+            index = nearestIndex(stops(), track.scrollLeft);
+            normalize();
         }, 120);
     }, { passive: true });
 
@@ -328,14 +377,16 @@ function buildSlider(images, title) {
     track.addEventListener('pointerenter', function() { activeSlider = api; });
     track.addEventListener('touchstart',   function() { activeSlider = api; }, { passive: true });
 
-    /* 행을 펼칠 때(display: none → flex)·창 크기 변경 시 현재 이미지 위치 유지 */
+    /* 행을 펼칠 때(display: none → flex)·창 크기 변경·이미지 로드 시 현재 이미지 위치 유지 */
     function realign() {
         if (drag) return;
         stopAnim();
+        updateMode();
         var list = stops();
-        index = Math.min(index, list.length - 1);
+        index = Math.max(0, Math.min(index, list.length - 1));
         track.scrollLeft = list[index];
-        refresh();
+        normalize();
+        track.classList.toggle('is-slidable', hasOverflow() && !nativeMode());
     }
     if ('ResizeObserver' in window) {
         new ResizeObserver(realign).observe(track);
