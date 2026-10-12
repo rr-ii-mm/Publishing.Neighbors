@@ -40,8 +40,8 @@ const activities = [
         date:     '2025. 11. 14. – 16., @SeMA, Buk-Seoul Museum of Art',
         url:      '#',
         images:   [
-            'assets/img/UE17_2026_2.JPG',
-            'assets/img/UE17_2026_3.JPG'
+            'assets/img/UE17_2026_1.JPG',
+            'assets/img/UE17_2026_2.JPG'
         ]
     },
     {
