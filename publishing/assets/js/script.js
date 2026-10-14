@@ -25,8 +25,13 @@ const BOOK_COLORS = [
     '#fffc44ff', // 브라이트 옐로우
 ];
 
-function randomBookColor() {
-    return BOOK_COLORS[Math.floor(Math.random() * BOOK_COLORS.length)];
+/* exclude를 주면 그 색과 다른 색을 고름 (고정 해제 시 이전 색과 겹치지 않게) */
+function randomBookColor(exclude) {
+    var c;
+    do {
+        c = BOOK_COLORS[Math.floor(Math.random() * BOOK_COLORS.length)];
+    } while (c === exclude && BOOK_COLORS.length > 1);
+    return c;
 }
 
 /* =====================================================
@@ -198,12 +203,32 @@ function buildGrid() {
                         tooltip.style.top  = ty + 'px';
                     }
 
-                    el.addEventListener('mouseenter', function() {
+                    /* 이미지 표시 상태
+                       - 기본: 랜덤 색상
+                       - 호버: 이미지 표시
+                       - 클릭: 이미지 고정 (다시 클릭하면 해제) */
+                    var hovering  = false;
+                    var lastTouch = 0;
+
+                    function showImage() {
                         resolveThumb(b, function(src) {
+                            if (!hovering && !b.pinned) return;   // 이미지 로딩 중 마우스가 나간 경우 표시 안 함
                             el.style.backgroundImage    = 'url(' + src + ')';
                             el.style.backgroundSize     = 'cover';
                             el.style.backgroundPosition = 'center';
                         });
+                    }
+
+                    function hideImage() {
+                        if (b.pinned) return;                      // 고정된 칸은 유지
+                        el.style.backgroundImage = '';
+                    }
+
+                    if (b.pinned) showImage();                     // 창 크기 변경으로 그리드를 다시 그려도 고정 유지
+
+                    el.addEventListener('mouseenter', function() {
+                        hovering = true;
+                        showImage();
                         showTooltip(b);
                     });
 
@@ -212,11 +237,29 @@ function buildGrid() {
                     });
 
                     el.addEventListener('mouseleave', function() {
-                        el.style.backgroundImage = '';
+                        hovering = false;
+                        hideImage();
                         tooltip.style.display = 'none';
                     });
 
+                    el.addEventListener('click', function() {
+                        b.pinned = !b.pinned;
+                        if (b.pinned) {
+                            showImage();
+                            return;
+                        }
+                        /* 고정 해제: 이전과 다른 랜덤 색상으로 교체 */
+                        b.color = randomBookColor(b.color);
+                        el.style.backgroundColor = b.color;
+                        if (tooltip.style.display === 'block') showTooltip(b);   // 툴팁 글자색도 새 배경에 맞춤
+                        if (Date.now() - lastTouch < 1000) {
+                            hovering = false;                      // 터치: 다시 탭하면 바로 새 색상으로
+                            hideImage();
+                        }                                          // 마우스: 해제 후 커서가 나가면 새 색상이 보임
+                    });
+
                     el.addEventListener('touchstart', function(e) {
+                        lastTouch = Date.now();
                         var touch = e.touches[0];
                         showTooltip(b);
                         requestAnimationFrame(function() {
