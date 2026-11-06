@@ -36,6 +36,7 @@ body {
     letter-spacing: 0.05em;
     line-height: 1;
 }
+/* 글자마다 아래 배경 밝기를 보고 JS가 검정/흰색 중 하나로 칠함 */
 .site-nav a {
     color: #000;
     text-decoration: none;
@@ -69,6 +70,62 @@ body {
 }
 
 .cell.book-cell {
+    cursor: pointer;
+}
+
+/* ── OPEN 라벨 (설명이 있는 책) ── */
+.cell.book-cell {
+    position: relative;
+}
+.open-label {
+    position: absolute;
+    right: 4%;
+    bottom: 4%;
+    width: 3.6em;
+    aspect-ratio: 1 / 1;      /* 정방형 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #ffffff;
+    color: #000000;
+    font-family: "vppixel-standard", sans-serif;
+    font-size: clamp(11px, 1.1vw, 18px);
+    line-height: 1;
+    pointer-events: none;
+}
+
+/* ── 책 설명 칸 (검은 배경 + 흰 글씨) ── */
+.cell.detail-cell {
+    background-color: #000000 !important;
+    background-image: none !important;
+    cursor: default;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+.detail-inner {
+    padding: 8%;
+    color: #ffffff;
+    text-align: center;
+    font-family: "Pretendard", sans-serif;
+    font-size: clamp(10px, 1vw, 15px);
+    font-weight: 400;
+    line-height: 1.5;
+    word-break: keep-all;
+}
+.detail-inner p + p {
+    margin-top: 1.2em;
+}
+.detail-inner .detail-link {
+    margin-top: 3em;
+}
+.detail-inner a {
+    color: #ffffff;
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+}
+.detail-inner a[href] {
     cursor: pointer;
 }
 

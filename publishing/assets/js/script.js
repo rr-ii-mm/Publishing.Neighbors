@@ -41,6 +41,21 @@ function randomBookColor(exclude) {
    ===================================================== */
 
 const books = [
+    { thumb: 'assets/img/books/허락없이_web cover', url: 'book/14/', title: '『허락없이: 인쇄에서 플랫폼까지』', author: '출판하는 이웃 엮음',
+      /* 클릭 시 옆 칸에 나타나는 설명 */
+      detail: {
+          titleKo:  '『허락없이: 인쇄에서 플랫폼까지』',
+          titleEn:  'Without Permission: Print to Platform',
+          author:   '출판하는 이웃 엮음, 2026',
+          spec:     'Digital Print, 148 × 210mm',
+          linkText: 'Download web book (zip)',
+          linkUrl:  'assets/허락없이-인쇄에서 플랫폼까지_web book.zip',
+          download: true   // 클릭 시 바로 다운로드
+      } },
+    { thumb: 'assets/img/books/자기 것을 빼고 세십시오',     url: 'book/15/', title: '『자기 것을 빼고 세십시오』',                    author: '이계프레스 Igye press' },
+    { thumb: 'assets/img/books/마음단추',                   url: 'book/16/', title: '『Button Up — where feelings hold』',          author: '이서영 Karen S. Lee' },
+    { thumb: 'assets/img/books/TheRagebook2',               url: 'book/17/', title: '『The Rage book2』',                           author: 'evil hamster' },
+    { thumb: 'assets/img/books/A key to my neighborhood',   url: 'book/18/', title: '『봉천동 사랑해야만 하기』 A Key to my Neighborhood', author: 'Sohui Kim' },
     { thumb: 'assets/img/books/1',  url: 'book/1/',  title: '『사소로운 것들: 목동 비공식 지도』',              author: '건킴 Gunkimm' },
     { thumb: 'assets/img/books/2',  url: 'book/2/',  title: '『Plants I saw and loved』',                   author: '홍혜림 Hyerim Hong' },
     { thumb: 'assets/img/books/3',  url: 'book/3/',  title: '『ABFFantasy』',                               author: '김연주 Yeonjoo Kim' },
@@ -137,12 +152,48 @@ function resolveThumb(book, onSuccess) {
      book i → row = floor(i / cols), col = cols - 1 - (i % cols)
    ===================================================== */
 
+/* =====================================================
+   설명 칸 (detail 이 있는 책)
+   책을 클릭해 고정하면 바로 다음 순서에 검은 설명 칸이 끼어들고
+   뒤의 책들은 한 칸씩 밀림 → 모든 책이 항상 보임
+   ===================================================== */
+
+function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, function(ch) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch];
+    });
+}
+
+function renderDetail(el, b) {
+    var d = b.detail;
+    var link = d.linkUrl && d.linkUrl !== '#'
+        ? '<a href="' + escapeHtml(encodeURI(d.linkUrl)) + '"' +
+              (d.download ? ' download' : ' target="_blank" rel="noopener"') +
+              '>' + escapeHtml(d.linkText) + '</a>'
+        : '<a>' + escapeHtml(d.linkText) + '</a>';
+    el.classList.add('detail-cell');
+    el.innerHTML =
+        '<div class="detail-inner">' +
+            '<p>' + escapeHtml(d.titleKo) + '<br>' + escapeHtml(d.titleEn) + '</p>' +
+            '<p>' + escapeHtml(d.author) + '</p>' +
+            '<p>' + escapeHtml(d.spec) + '</p>' +
+            '<p class="detail-link">' + link + '</p>' +
+        '</div>';
+}
+
 function buildGrid() {
     var grid = document.getElementById('grid');
     grid.innerHTML = '';
 
+    // 고정된 detail 책 바로 뒤에 설명 칸을 끼워 넣은 배치 목록
+    var items = [];
+    books.forEach(function(b) {
+        items.push(b);
+        if (b.detail && b.pinned) items.push({ detailOf: b });
+    });
+
     // 목표 셀 크기(CELL_SIZE)에서 시작, 데이터 셀이 뷰포트를 벗어나면 cols를 늘려 셀을 축소
-    var dataCount = books.filter(function(b) { return b.title; }).length;
+    var dataCount = items.filter(function(b) { return b.title || b.detailOf; }).length;
     var cols   = Math.max(1, Math.round(window.innerWidth / CELL_SIZE));
     var cellPx = window.innerWidth / cols;
     while (Math.ceil(dataCount / cols) * cellPx > window.innerHeight) {
@@ -158,7 +209,7 @@ function buildGrid() {
     // 책 인덱스 i → 그리드 좌표
     // 좌측 상단(col=0)부터 우→우, 행마다 좌측에서 시작
     var bookMap = {};
-    books.forEach(function(book, i) {
+    items.forEach(function(book, i) {
         var row = Math.floor(i / cols);
         var col = i % cols;
         if (row < rows) {
@@ -176,18 +227,29 @@ function buildGrid() {
             cell.className = 'cell';
 
             var book = bookMap[r + ',' + c];
-            if (book && book.title) {
+            if (book && book.detailOf) {
+                renderDetail(cell, book.detailOf);
+            } else if (book && book.title) {
                 (function(b, el) {
                     el.classList.add('book-cell');
+
+                    // 설명 칸이 열려 있는 책은 툴팁을 띄우지 않음 (겹침 방지)
+                    function detailOpen() { return b.detail && b.pinned; }
+
+                    // 설명이 있는 책: 닫혀 있을 때 우측 하단에 OPEN 라벨
+                    if (b.detail && !b.pinned) {
+                        var label = document.createElement('span');
+                        label.className = 'open-label';
+                        label.textContent = 'OPEN';
+                        el.appendChild(label);
+                    }
                     el.style.backgroundColor = b.color;
 
                     function showTooltip(b) {
-                        var tc = contrastColor(b.color);
-                        labelTitle.style.color  = tc;
-                        labelAuthor.style.color = tc;
-                        labelTitle.textContent  = b.title  || '';
-                        labelAuthor.textContent = b.author || '';
+                        setLetters(labelTitle,  b.title  || '');
+                        setLetters(labelAuthor, b.author || '');
                         tooltip.style.display = 'block';
+                        colorLetters(tooltip.querySelectorAll('.ch'));
                     }
 
                     function positionTooltip(cx, cy) {
@@ -201,6 +263,7 @@ function buildGrid() {
                         if (ty < 8) ty = 8;
                         tooltip.style.left = tx + 'px';
                         tooltip.style.top  = ty + 'px';
+                        colorLetters(tooltip.querySelectorAll('.ch'));   // 글자마다 흑/백
                     }
 
                     /* 이미지 표시 상태
@@ -213,7 +276,7 @@ function buildGrid() {
                     function showImage() {
                         resolveThumb(b, function(src) {
                             if (!hovering && !b.pinned) return;   // 이미지 로딩 중 마우스가 나간 경우 표시 안 함
-                            el.style.backgroundImage    = 'url(' + src + ')';
+                            el.style.backgroundImage    = 'url("' + src + '")';
                             el.style.backgroundSize     = 'cover';
                             el.style.backgroundPosition = 'center';
                         });
@@ -229,10 +292,11 @@ function buildGrid() {
                     el.addEventListener('mouseenter', function() {
                         hovering = true;
                         showImage();
-                        showTooltip(b);
+                        if (!detailOpen()) showTooltip(b);
                     });
 
                     el.addEventListener('mousemove', function(e) {
+                        if (detailOpen()) return;
                         positionTooltip(e.clientX, e.clientY);
                     });
 
@@ -244,6 +308,13 @@ function buildGrid() {
 
                     el.addEventListener('click', function() {
                         b.pinned = !b.pinned;
+                        if (b.detail) {
+                            /* 설명 칸 열기/닫기: 배치를 다시 그려 뒤 책들을 한 칸씩 밀거나 되돌림 */
+                            if (!b.pinned) b.color = randomBookColor(b.color);
+                            tooltip.style.display = 'none';
+                            buildGrid();
+                            return;
+                        }
                         if (b.pinned) {
                             showImage();
                             return;
@@ -291,3 +362,114 @@ window.addEventListener('resize', function() {
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(buildGrid, 150);
 });
+
+/* =====================================================
+   글자 흑/백 반전 (메뉴 + 호버 툴팁)
+   글자 하나하나 아래 배경의 밝기를 재서
+   밝으면 완전 검정(#000), 어두우면 완전 흰색(#fff)
+   ===================================================== */
+
+var imgCache = {};
+
+// 텍스트를 글자 단위 span(.ch)으로 쪼개서 넣음
+function setLetters(el, text) {
+    el.textContent = '';
+    for (var i = 0; i < text.length; i++) {
+        var s = document.createElement('span');
+        s.className = 'ch';
+        s.textContent = text[i];
+        el.appendChild(s);
+    }
+}
+
+function colorLetters(spans) {
+    Array.prototype.forEach.call(spans, function(s) {
+        var rgb = letterBackground(s.getBoundingClientRect());
+        var lum = (0.299 * rgb[0] + 0.587 * rgb[1] + 0.114 * rgb[2]) / 255;
+        s.style.color = lum < 0.5 ? '#ffffff' : '#000000';
+    });
+}
+
+document.querySelectorAll('.site-nav a').forEach(function(a) {
+    setLetters(a, a.textContent);
+});
+var navLetters = document.querySelectorAll('.site-nav .ch');
+
+// 배경 이미지의 해당 영역 평균 색 (이미지 로딩 전/읽기 불가면 null)
+function sampleImage(src, cell, rect) {
+    var e = imgCache[src];
+    if (!e) {
+        e = imgCache[src] = { img: new Image(), ctx: null };
+        e.img.onload = function() {
+            try {
+                var cv = document.createElement('canvas');
+                cv.width  = e.img.naturalWidth;
+                cv.height = e.img.naturalHeight;
+                var ctx = cv.getContext('2d', { willReadFrequently: true });
+                ctx.drawImage(e.img, 0, 0);
+                ctx.getImageData(0, 0, 1, 1);          // 읽기 가능한지 확인
+                e.ctx = ctx;
+            } catch (err) { /* file:// 등에서 읽기 불가 → 배경색으로 대체 */ }
+            scheduleNavUpdate();
+        };
+        e.img.src = src;
+    }
+    if (!e.ctx) return null;
+
+    // background-size: cover + center 기준으로 화면 좌표 → 이미지 좌표
+    var cr = cell.getBoundingClientRect();
+    var iw = e.img.naturalWidth, ih = e.img.naturalHeight;
+    var scale = Math.max(cr.width / iw, cr.height / ih);
+    var ox = cr.left + (cr.width  - iw * scale) / 2;
+    var oy = cr.top  + (cr.height - ih * scale) / 2;
+    var sx = Math.max(0, Math.floor((rect.left - ox) / scale));
+    var sy = Math.max(0, Math.floor((rect.top  - oy) / scale));
+    if (sx >= iw || sy >= ih) return null;
+    var sw = Math.max(1, Math.min(iw - sx, Math.ceil(rect.width  / scale)));
+    var sh = Math.max(1, Math.min(ih - sy, Math.ceil(rect.height / scale)));
+
+    var d = e.ctx.getImageData(sx, sy, sw, sh).data;
+    var r = 0, g = 0, b = 0, n = d.length / 4;
+    for (var i = 0; i < d.length; i += 4) { r += d[i]; g += d[i + 1]; b += d[i + 2]; }
+    return [r / n, g / n, b / n];
+}
+
+function letterBackground(rect) {
+    var x = rect.left + rect.width / 2;
+    var y = rect.top  + rect.height / 2;
+    var cell = null;
+    var els = document.elementsFromPoint(x, y);
+    for (var i = 0; i < els.length; i++) {
+        cell = els[i].closest('.cell');
+        if (cell) break;
+    }
+    if (!cell) return [255, 255, 255];
+
+    var bg = cell.style.backgroundImage;
+    if (bg && !cell.classList.contains('detail-cell')) {
+        var m = bg.match(/url\(["']?(.*?)["']?\)/);
+        var rgb = m && sampleImage(m[1], cell, rect);
+        if (rgb) return rgb;
+    }
+    var c = getComputedStyle(cell).backgroundColor.match(/\d+(\.\d+)?/g) || [255, 255, 255];
+    return [+c[0], +c[1], +c[2]];
+}
+
+function updateNavColors() {
+    colorLetters(navLetters);
+    var tip = document.getElementById('thumbnail');
+    if (tip.style.display === 'block') colorLetters(tip.querySelectorAll('.ch'));
+}
+
+var navRaf = 0;
+function scheduleNavUpdate() {
+    if (navRaf) return;
+    navRaf = requestAnimationFrame(function() { navRaf = 0; updateNavColors(); });
+}
+
+// 그리드 색/이미지/배치가 바뀔 때마다 다시 계산
+new MutationObserver(scheduleNavUpdate).observe(document.getElementById('grid'), {
+    subtree: true, childList: true, attributes: true, attributeFilter: ['style', 'class']
+});
+window.addEventListener('resize', scheduleNavUpdate);
+scheduleNavUpdate();
