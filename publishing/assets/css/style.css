@@ -148,6 +148,30 @@ body {
 }
 
 @media (max-width: 768px) {
+    /* 모바일: 칸을 크게(1행 3칸) 하고 넘치는 책은 세로 스크롤 */
+    body {
+        height: auto;
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
+    #grid {
+        position: relative;
+    }
+    /* 2칸짜리 설명 칸: 높이가 1칸이라 여백을 줄임 */
+    .detail-inner {
+        padding: 4% 6%;
+        font-size: 10px;
+    }
+    .detail-inner p + p {
+        margin-top: 0.6em;
+    }
+    /* author ↔ spec 간격은 절반 */
+    .detail-inner p:nth-child(3) {
+        margin-top: 0.3em;
+    }
+    .detail-inner .detail-link {
+        margin-top: 1.2em;
+    }
     .thumbnail-tooltip {
         max-width: calc(100vw - 36px);
         width: auto;

@@ -1,5 +1,7 @@
 
 const CELL_SIZE = 260; // 셀 크기(px)
+const MOBILE_MAX  = 768; // 이 너비 이하를 모바일로 봄
+const MOBILE_COLS = 3;   // 모바일에서 1행에 들어가는 칸 수
 
 /* =====================================================
    색상 팔레트 — 첨부 이미지 기준
@@ -41,7 +43,7 @@ function randomBookColor(exclude) {
    ===================================================== */
 
 const books = [
-    { thumb: 'assets/img/books/허락없이_web cover', url: 'book/14/', title: '『허락없이: 인쇄에서 플랫폼까지』', author: '출판하는 이웃 엮음',
+    { thumb: 'assets/img/thumbs/허락없이_web cover.jpg', url: 'book/14/', title: '『허락없이: 인쇄에서 플랫폼까지』', author: '출판하는 이웃 엮음',
       /* 클릭 시 옆 칸에 나타나는 설명 */
       detail: {
           titleKo:  '『허락없이: 인쇄에서 플랫폼까지』',
@@ -52,55 +54,55 @@ const books = [
           linkUrl:  'assets/허락없이-인쇄에서 플랫폼까지_web book.zip',
           download: true   // 클릭 시 바로 다운로드
       } },
-    { thumb: 'assets/img/books/자기 것을 빼고 세십시오',     url: 'book/15/', title: '『자기 것을 빼고 세십시오』',                    author: '이계프레스 Igye press' },
-    { thumb: 'assets/img/books/마음단추',                   url: 'book/16/', title: '『Button Up — where feelings hold』',          author: '이서영 Karen S. Lee' },
-    { thumb: 'assets/img/books/TheRagebook2',               url: 'book/17/', title: '『The Rage book2』',                           author: 'evil hamster' },
-    { thumb: 'assets/img/books/A key to my neighborhood',   url: 'book/18/', title: '『봉천동 사랑해야만 하기』 A Key to my Neighborhood', author: 'Sohui Kim' },
-    { thumb: 'assets/img/books/1',  url: 'book/1/',  title: '『사소로운 것들: 목동 비공식 지도』',              author: '건킴 Gunkimm' },
-    { thumb: 'assets/img/books/2',  url: 'book/2/',  title: '『Plants I saw and loved』',                   author: '홍혜림 Hyerim Hong' },
-    { thumb: 'assets/img/books/3',  url: 'book/3/',  title: '『ABFFantasy』',                               author: '김연주 Yeonjoo Kim' },
-    { thumb: 'assets/img/books/4',  url: 'book/4/',  title: '『변화하는 것들. 이 ‘책’은 유연하고 단단한 존재들에 대한 시각적 기록입니다.』', author: '홍혜림 Hyerim Hong' },
-    { thumb: 'assets/img/books/5',  url: 'book/5/',  title: '『FREEGRID HOUSE』',                           author: '임정빈 Jeongbin Im' },
-    { thumb: 'assets/img/books/6',  url: 'book/6/',  title: '『CONTINGENT REPORTS』',                       author: '이서영 Karen S. Lee' },
-    { thumb: 'assets/img/books/7',  url: 'book/7/',  title: '『Fieldguide in Veil』',                       author: '용서우 Seowoo Yong' },
-    { thumb: 'assets/img/books/8',  url: 'book/8/',  title: '『The Rabbit Pond Story』',                    author: '김연주 Yeonjoo Kim' },
-    { thumb: 'assets/img/books/9',  url: 'book/9/',  title: '『Heavily Stapled Book』',                     author: '김소희 Sohui Kim' },
-    { thumb: 'assets/img/books/10', url: 'book/10/', title: '『Fractal: The Logic of Irregular Repetition』', author: '김동건 Donggun Kim' },
-    { thumb: 'assets/img/books/11', url: 'book/11/', title: '『Vook Book of Voyeurism』',                   author: '손서영 Seoyeong Son' },
-    { thumb: 'assets/img/books/12', url: 'book/12/', title: '『2020 New York. The doors』',                 author: '홍혜림 Hyerim Hong' },
-    { thumb: 'assets/img/books/13', url: 'book/13/', title: '『Daeshinsa Manual Book』',                    author: '김혜영 Hyeyoung Kim, 이주희 Juhui Lee' },
-    { thumb: 'assets/img/books/9',  url: 'book/9/' },
-    { thumb: 'assets/img/books/10', url: 'book/10/' },
-    { thumb: 'assets/img/books/11', url: 'book/11/' },
-    { thumb: 'assets/img/books/12', url: 'book/12/' },
-    { thumb: 'assets/img/books/13', url: 'book/13/' },
-    { thumb: 'assets/img/books/14', url: 'book/14/' },
-    { thumb: 'assets/img/books/15', url: 'book/15/' },
-    { thumb: 'assets/img/books/16', url: 'book/16/' },
-    { thumb: 'assets/img/books/17', url: 'book/17/' },
-    { thumb: 'assets/img/books/18', url: 'book/18/' },
-    { thumb: 'assets/img/books/19', url: 'book/19/' },
-    { thumb: 'assets/img/books/20', url: 'book/20/' },
-    { thumb: 'assets/img/books/21', url: 'book/21/' },
-    { thumb: 'assets/img/books/22', url: 'book/22/' },
-    { thumb: 'assets/img/books/23', url: 'book/23/' },
-    { thumb: 'assets/img/books/24', url: 'book/24/' },
-    { thumb: 'assets/img/books/25', url: 'book/25/' },
-    { thumb: 'assets/img/books/26', url: 'book/26/' },
-    { thumb: 'assets/img/books/27', url: 'book/27/' },
-    { thumb: 'assets/img/books/28', url: 'book/28/' },
-    { thumb: 'assets/img/books/29', url: 'book/29/' },
-    { thumb: 'assets/img/books/30', url: 'book/30/' },
-    { thumb: 'assets/img/books/31', url: 'book/31/' },
-    { thumb: 'assets/img/books/32', url: 'book/32/' },
-    { thumb: 'assets/img/books/33', url: 'book/33/' },
-    { thumb: 'assets/img/books/34', url: 'book/34/' },
-    { thumb: 'assets/img/books/35', url: 'book/35/' },
-    { thumb: 'assets/img/books/36', url: 'book/36/' },
-    { thumb: 'assets/img/books/37', url: 'book/37/' },
-    { thumb: 'assets/img/books/38', url: 'book/38/' },
-    { thumb: 'assets/img/books/39', url: 'book/39/' },
-    { thumb: 'assets/img/books/40', url: 'book/40/' },
+    { thumb: 'assets/img/thumbs/자기 것을 빼고 세십시오.jpg',     url: 'book/15/', title: '『자기 것을 빼고 세십시오』',                    author: '이계프레스 Igye press' },
+    { thumb: 'assets/img/thumbs/마음단추.jpg',                   url: 'book/16/', title: '『Button Up — where feelings hold』',          author: '이서영 Karen S. Lee' },
+    { thumb: 'assets/img/thumbs/TheRagebook2.jpg',               url: 'book/17/', title: '『The Rage book2』',                           author: 'evil hamster' },
+    { thumb: 'assets/img/thumbs/A key to my neighborhood.jpg',   url: 'book/18/', title: '『봉천동 사랑해야만 하기』 A Key to my Neighborhood', author: 'Sohui Kim' },
+    { thumb: 'assets/img/thumbs/1.jpg',  url: 'book/1/',  title: '『사소로운 것들: 목동 비공식 지도』',              author: '건킴 Gunkimm' },
+    { thumb: 'assets/img/thumbs/2.jpg',  url: 'book/2/',  title: '『Plants I saw and loved』',                   author: '홍혜림 Hyerim Hong' },
+    { thumb: 'assets/img/thumbs/3.jpg',  url: 'book/3/',  title: '『ABFFantasy』',                               author: '김연주 Yeonjoo Kim' },
+    { thumb: 'assets/img/thumbs/4.jpg',  url: 'book/4/',  title: '『변화하는 것들. 이 ‘책’은 유연하고 단단한 존재들에 대한 시각적 기록입니다.』', author: '홍혜림 Hyerim Hong' },
+    { thumb: 'assets/img/thumbs/5.jpg',  url: 'book/5/',  title: '『FREEGRID HOUSE』',                           author: '임정빈 Jeongbin Im' },
+    { thumb: 'assets/img/thumbs/6.jpg',  url: 'book/6/',  title: '『CONTINGENT REPORTS』',                       author: '이서영 Karen S. Lee' },
+    { thumb: 'assets/img/thumbs/7.jpg',  url: 'book/7/',  title: '『Fieldguide in Veil』',                       author: '용서우 Seowoo Yong' },
+    { thumb: 'assets/img/thumbs/8.jpg',  url: 'book/8/',  title: '『The Rabbit Pond Story』',                    author: '김연주 Yeonjoo Kim' },
+    { thumb: 'assets/img/thumbs/9.jpg',  url: 'book/9/',  title: '『Heavily Stapled Book』',                     author: '김소희 Sohui Kim' },
+    { thumb: 'assets/img/thumbs/10.jpg', url: 'book/10/', title: '『Fractal: The Logic of Irregular Repetition』', author: '김동건 Donggun Kim' },
+    { thumb: 'assets/img/thumbs/11.jpg', url: 'book/11/', title: '『Vook Book of Voyeurism』',                   author: '손서영 Seoyeong Son' },
+    { thumb: 'assets/img/thumbs/12.jpg', url: 'book/12/', title: '『2020 New York. The doors』',                 author: '홍혜림 Hyerim Hong' },
+    { thumb: 'assets/img/thumbs/13.jpg', url: 'book/13/', title: '『Daeshinsa Manual Book』',                    author: '김혜영 Hyeyoung Kim, 이주희 Juhui Lee' },
+    { thumb: 'assets/img/thumbs/9.jpg',  url: 'book/9/' },
+    { thumb: 'assets/img/thumbs/10.jpg', url: 'book/10/' },
+    { thumb: 'assets/img/thumbs/11.jpg', url: 'book/11/' },
+    { thumb: 'assets/img/thumbs/12.jpg', url: 'book/12/' },
+    { thumb: 'assets/img/thumbs/13.jpg', url: 'book/13/' },
+    { thumb: 'assets/img/thumbs/14.jpg', url: 'book/14/' },
+    { thumb: 'assets/img/thumbs/15.jpg', url: 'book/15/' },
+    { thumb: 'assets/img/thumbs/16.jpg', url: 'book/16/' },
+    { thumb: 'assets/img/thumbs/17.jpg', url: 'book/17/' },
+    { thumb: 'assets/img/thumbs/18.jpg', url: 'book/18/' },
+    { thumb: 'assets/img/thumbs/19.jpg', url: 'book/19/' },
+    { thumb: 'assets/img/thumbs/20.jpg', url: 'book/20/' },
+    { thumb: 'assets/img/thumbs/21.jpg', url: 'book/21/' },
+    { thumb: 'assets/img/thumbs/22.jpg', url: 'book/22/' },
+    { thumb: 'assets/img/thumbs/23.jpg', url: 'book/23/' },
+    { thumb: 'assets/img/thumbs/24.jpg', url: 'book/24/' },
+    { thumb: 'assets/img/thumbs/25.jpg', url: 'book/25/' },
+    { thumb: 'assets/img/thumbs/26.jpg', url: 'book/26/' },
+    { thumb: 'assets/img/thumbs/27.jpg', url: 'book/27/' },
+    { thumb: 'assets/img/thumbs/28.jpg', url: 'book/28/' },
+    { thumb: 'assets/img/thumbs/29.jpg', url: 'book/29/' },
+    { thumb: 'assets/img/thumbs/30.jpg', url: 'book/30/' },
+    { thumb: 'assets/img/thumbs/31.jpg', url: 'book/31/' },
+    { thumb: 'assets/img/thumbs/32.jpg', url: 'book/32/' },
+    { thumb: 'assets/img/thumbs/33.jpg', url: 'book/33/' },
+    { thumb: 'assets/img/thumbs/34.jpg', url: 'book/34/' },
+    { thumb: 'assets/img/thumbs/35.jpg', url: 'book/35/' },
+    { thumb: 'assets/img/thumbs/36.jpg', url: 'book/36/' },
+    { thumb: 'assets/img/thumbs/37.jpg', url: 'book/37/' },
+    { thumb: 'assets/img/thumbs/38.jpg', url: 'book/38/' },
+    { thumb: 'assets/img/thumbs/39.jpg', url: 'book/39/' },
+    { thumb: 'assets/img/thumbs/40.jpg', url: 'book/40/' },
 ];
 
 /* =====================================================
@@ -134,10 +136,12 @@ function resolveThumb(book, onSuccess) {
         return;
     }
     var base = book.thumb;
+    // 경로에 확장자가 있으면 그대로 한 번만 요청 (실패 요청 없이 바로 로드)
+    var exts = /\.(png|jpe?g|webp)$/i.test(base) ? [''] : THUMB_EXTS;
     var i = 0;
     function tryNext() {
-        if (i >= THUMB_EXTS.length) { book._resolvedThumb = null; return; }
-        var src = base + THUMB_EXTS[i++];
+        if (i >= exts.length) { book._resolvedThumb = null; return; }
+        var src = base + exts[i++];
         var img = new Image();
         img.onload  = function() { book._resolvedThumb = src; onSuccess(src); };
         img.onerror = tryNext;
@@ -186,21 +190,34 @@ function buildGrid() {
     grid.innerHTML = '';
 
     // 고정된 detail 책 바로 뒤에 설명 칸을 끼워 넣은 배치 목록
+    // 모바일에서는 설명 칸이 2칸 너비 (뒤에 자리 채움용 spacer 하나 추가)
+    var isMobile = window.innerWidth <= MOBILE_MAX;
     var items = [];
     books.forEach(function(b) {
         items.push(b);
-        if (b.detail && b.pinned) items.push({ detailOf: b });
+        if (b.detail && b.pinned) {
+            items.push({ detailOf: b });
+            if (isMobile) items.push({ detailSpacer: true });
+        }
     });
 
     // 목표 셀 크기(CELL_SIZE)에서 시작, 데이터 셀이 뷰포트를 벗어나면 cols를 늘려 셀을 축소
-    var dataCount = items.filter(function(b) { return b.title || b.detailOf; }).length;
-    var cols   = Math.max(1, Math.round(window.innerWidth / CELL_SIZE));
-    var cellPx = window.innerWidth / cols;
-    while (Math.ceil(dataCount / cols) * cellPx > window.innerHeight) {
-        cols++;
+    var dataCount = items.filter(function(b) { return b.title || b.detailOf || b.detailSpacer; }).length;
+    var cols, cellPx, rows;
+    if (isMobile) {
+        // 모바일: 1행에 3칸 고정, 넘치는 책은 아래로 스크롤
+        cols   = MOBILE_COLS;
         cellPx = window.innerWidth / cols;
+        rows   = Math.max(Math.ceil(dataCount / cols), Math.ceil(window.innerHeight / cellPx));
+    } else {
+        cols   = Math.max(1, Math.round(window.innerWidth / CELL_SIZE));
+        cellPx = window.innerWidth / cols;
+        while (Math.ceil(dataCount / cols) * cellPx > window.innerHeight) {
+            cols++;
+            cellPx = window.innerWidth / cols;
+        }
+        rows   = Math.ceil(window.innerHeight / cellPx);
     }
-    var rows   = Math.ceil(window.innerHeight / cellPx);
 
     grid.style.setProperty('--cols',    cols);
     grid.style.setProperty('--rows',    rows);
@@ -220,15 +237,27 @@ function buildGrid() {
     var tooltip     = document.getElementById('thumbnail');
     var labelTitle  = document.querySelector('#thumbnail .book-title');
     var labelAuthor = document.querySelector('#thumbnail .book-author');
+    var spanned     = {};
 
     for (var r = 0; r < rows; r++) {
         for (var c = 0; c < cols; c++) {
+            if (spanned[r + ',' + c]) continue;   // 앞 설명 칸이 2칸으로 차지한 자리
+
             var cell = document.createElement('div');
             cell.className = 'cell';
 
             var book = bookMap[r + ',' + c];
             if (book && book.detailOf) {
+                // 다음 자리가 spacer이고 같은 행이면 2칸으로 합침
+                var next = bookMap[r + ',' + (c + 1)];
+                if (next && next.detailSpacer) {
+                    cell.style.gridColumn = 'span 2';
+                    spanned[r + ',' + (c + 1)] = true;
+                }
                 renderDetail(cell, book.detailOf);
+            } else if (book && book.detailSpacer) {
+                // 설명 칸이 행 끝에 걸려 합치지 못한 경우: 빈 검은 칸
+                cell.classList.add('detail-cell');
             } else if (book && book.title) {
                 (function(b, el) {
                     el.classList.add('book-cell');
@@ -357,6 +386,21 @@ function buildGrid() {
 
 buildGrid();
 
+/* 화면이 뜬 뒤 여유 시간에 책 썸네일을 앞에서부터 하나씩 미리 받아둠
+   → 탭/호버 시 이미지가 바로 보임 */
+(function preloadThumbs() {
+    var queue = books.filter(function(b) { return b.title; });
+    function next() {
+        var b = queue.shift();
+        if (!b) return;
+        resolveThumb(b, function() {});
+        setTimeout(next, 50);
+    }
+    window.addEventListener('load', function() {
+        (window.requestIdleCallback || function(fn) { setTimeout(fn, 300); })(next);
+    });
+})();
+
 var resizeTimer;
 window.addEventListener('resize', function() {
     clearTimeout(resizeTimer);
@@ -472,4 +516,5 @@ new MutationObserver(scheduleNavUpdate).observe(document.getElementById('grid'),
     subtree: true, childList: true, attributes: true, attributeFilter: ['style', 'class']
 });
 window.addEventListener('resize', scheduleNavUpdate);
+window.addEventListener('scroll', scheduleNavUpdate, { passive: true });   // 모바일 스크롤 시 메뉴 색 갱신
 scheduleNavUpdate();
